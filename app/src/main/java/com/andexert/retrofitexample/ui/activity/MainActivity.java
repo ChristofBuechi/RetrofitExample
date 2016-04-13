@@ -14,12 +14,14 @@ import android.widget.TextView;
 import com.andexert.retrofitexample.R;
 import com.andexert.retrofitexample.app.App;
 import com.andexert.retrofitexample.rest.model.ApiResponse;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.Request;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-import java.util.SimpleTimeZone;
-import java.util.TimeZone;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -65,6 +67,26 @@ public class MainActivity extends Activity {
         ButterKnife.inject(this);
 
 
+        App.getRestClient().setInterceptor(new Interceptor() {
+            @Override
+            public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+                Request originalRequest = chain.request();
+
+                URL newUrl = originalRequest.url();
+                String urlString = newUrl.toString() + "&APPID=51b50d020a397f4a110d0b55733a23incomplete";
+                Log.d("calledurl",urlString);
+                newUrl = new URL(urlString);
+
+
+                Request request =  new Request.Builder()
+                        .url(newUrl)
+                        .method(originalRequest.method(), originalRequest.body())
+                        .headers(originalRequest.headers())
+                        .build();
+
+                return chain.proceed(request);
+            }
+        });
     }
 
     @OnClick(R.id.activity_main_search_button)
